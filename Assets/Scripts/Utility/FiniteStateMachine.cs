@@ -1,11 +1,14 @@
 namespace FiniteStateMachine
 {
+    //creating an interface which defines which 
     public interface IState
     {
         void OnEnter();
         void OnUpdate();
         void OnExit();
     }
+
+    
     public class StateMachine
     {
         public IState CurrentState { get; private set; }
