@@ -6,13 +6,15 @@ public class Combatant : MonoBehaviour
 {
     //publically gettable privately settable stats
 
-    public int HP { get; private set; }
+    public float HP;
     public int ATK { get; private set; }
     public int ATKT { get; private set; }
     public int DEF { get; private set; }
     public int TYPE { get; private set; }
     public int DMG { get; private set; }
     public int PRI { get; private set; }
+
+    private float maxHP;
 
     //enum for determining the character's class
     public enum CharClass { Knight, Wizard, Ranger, Barbarian, Robot, Skeleton, Scientist, Rogue };
@@ -21,18 +23,44 @@ public class Combatant : MonoBehaviour
 
     //enum for determining colour/element identity
     public enum ColourID {  Blue, Red, Green, Black, White };
-    public ColourID colourID { get; private set; } 
+    public ColourID colourID;
 
     public enum AtkColourID { Blue, Red, Green, Black, White };
-    public AtkColourID atkColourID { get; private set; }
+    public AtkColourID atkColourID;
 
-    //string for modifying the name
-    private string newName;
+    private bool isBot; 
+    //reference to the sprite renderer on this game object
+    private SpriteRenderer spriteRenderer;
+
+    [SerializeField] private List<Sprite> playerSprites = new List<Sprite>(); 
+    [SerializeField] private List<Sprite> botSprites = new List<Sprite>();
+    private void Awake()
+    {
+        TryGetComponent<SpriteRenderer>(out spriteRenderer);
+    }
 
     private void Start()
     {
         SetStats(charClass);
         SetColourID();
+        SetSprite(charClass);
+        SetName(charClass);
+    }
+
+    public CharClass GetCharClass()
+    {
+        return charClass;
+    }
+
+    public string GetName()
+    {
+        return name;
+    }
+
+    public float GetHPNormalized()
+    {
+        float hpPercent = (HP / maxHP);
+        return hpPercent;
     }
 
     //method for setting stats based on class
@@ -90,7 +118,13 @@ public class Combatant : MonoBehaviour
                 break;
                 
         }
-        Debug.Log("Stats are:\n HP: " + HP + "\n ATK: " + ATK + "\n DEF " + DEF + "\n PRI " + PRI);
+        maxHP = HP;
+        //Debug.Log("Stats are:\n HP: " + HP + "\n ATK: " + ATK + "\n DEF " + DEF + "\n PRI " + PRI);
+    }
+
+    public void SetName(CharClass _class)
+    {
+        name = colourID + " " + _class;
     }
 
     public void SetColourID()
@@ -152,16 +186,27 @@ public class Combatant : MonoBehaviour
                     atkColourID = (AtkColourID)1;
                 }
                 break;
-        }
-        SetName(colourID);
-        Debug.Log("TYPE is " + colourID + " and ATKT is " + atkColourID + "\nName is: " + name);
+        }        
 
     }
 
-    public void SetName(ColourID colourID)
+    public void SetSprite(CharClass _class)
     {
-        newName = colourID + " " + name;
-        name = newName;
+        if (isBot == false) 
+        {
+            //Debug.Log("I am " + name + "and my class is " + _class);
+            spriteRenderer.sprite = playerSprites[(int)_class];
+        }
+        else
+        {
+            //Debug.Log("I am " + name + "and my class is " + _class);
+            spriteRenderer.sprite = botSprites[(int)_class];
+        }
     }
-    
+
+    public void SetBot(bool setBot)
+    {
+        isBot = setBot;
+    }
+
 }

@@ -98,3 +98,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   charClass: 1
+  colourID: 0
+  atkColourID: 0
+  playerSprites:
+  - {fileID: 21300000, guid: b5e7cf23318de1c4c8a28245ffb4d4b6, type: 3}
+  - {fileID: 21300000, guid: bf1ed7f55920c0b498eaceff5a28c9c2, type: 3}
+  - {fileID: 21300000, guid: 09b35b3fd3a529940be5b72a833499df, type: 3}
+  - {fileID: 21300000, guid: f718d7c31a503f64898f2177f836405f, type: 3}
+  - {fileID: 21300000, guid: 5c4afdd3feccabe4eac37b065dadd19a, type: 3}
+  - {fileID: 21300000, guid: ccdd9aa34e8976b4da5a2a79cd7df6c3, type: 3}
+  - {fileID: 21300000, guid: 4fa086d9ecfb4734e948f9abd51fbcb0, type: 3}
+  - {fileID: 21300000, guid: 121d7cb6d87713d4e8627948ab515c73, type: 3}
+  botSprites:
+  - {fileID: 21300000, guid: b5e7cf23318de1c4c8a28245ffb4d4b6, type: 3}
+  - {fileID: 21300000, guid: bf1ed7f55920c0b498eaceff5a28c9c2, type: 3}
+  - {fileID: 21300000, guid: 09b35b3fd3a529940be5b72a833499df, type: 3}
+  - {fileID: 21300000, guid: f718d7c31a503f64898f2177f836405f, type: 3}
+  - {fileID: 21300000, guid: 5c4afdd3feccabe4eac37b065dadd19a, type: 3}
+  - {fileID: 21300000, guid: ccdd9aa34e8976b4da5a2a79cd7df6c3, type: 3}
+  - {fileID: 21300000, guid: 4fa086d9ecfb4734e948f9abd51fbcb0, type: 3}
+  - {fileID: 21300000, guid: 121d7cb6d87713d4e8627948ab515c73, type: 3}

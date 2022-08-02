@@ -10,9 +10,21 @@ public class FighterSelectPortrait : MonoBehaviour
     //reference to the image component on the object attached to this
     private Image portrait;
 
+    private int fighterID;
+
     private void Awake()
     {
         TryGetComponent<Image>(out portrait);
+    }
+
+    public void SetFighterID(int ID)
+    {
+        fighterID = ID;
+    }
+
+    public int GetFighterID()
+    {
+        return fighterID;
     }
 
     //method for receiving the class ID of the character 'in' this slot and updating the UI accordingly

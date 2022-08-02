@@ -6,6 +6,10 @@ using FiniteStateMachine;
 
 public class GameManager : MonoBehaviour
 {
+
+    //header for all the lists
+    [Header("Lists of Prefabs and Rosters")]
+
     //list of all prefab characters 'prefabCharacters'
     [SerializeField] private List<Combatant> prefabCharacters = new List<Combatant>();
 
@@ -14,12 +18,37 @@ public class GameManager : MonoBehaviour
     //list of character class 'botRoster'
     [SerializeField] private List<Combatant> botRoster = new List<Combatant>();
 
+    //dunno if I'll need these???
+    //list of combatants from player roster who are alive
+    //list of combatants from bot roster who are alive
+
+
+
     [SerializeField] private List<FighterSelectPortrait> fighterPortraits;
 
+    [Header ("UI Elements to Activate/Deactivate")]
     [SerializeField] private GameObject chooseFighterUI;
+    [SerializeField] private GameObject combatUI;
+
+    [Header("Current Player and Bot Deployed Combatants")]
+    [SerializeField] private Combatant playerCombatant;
+    [SerializeField] private Combatant botCombatant;
+
+    [Header("References to the player and bot sprite positions")]
+    [SerializeField] private Transform playerFighterPos;
+    [SerializeField] private Transform botFighterPos;
+
+    [Header("Combat UI elements")]
+    [SerializeField] private Text playerCombatantName;
+    [SerializeField] private Text botCombatantName;
+
+    [SerializeField] private Image playerHealthBar;
+    [SerializeField] private Image botHealthBar;
 
     public StateMachine StateMachine { get; private set; }
 
+    private GameObject playerRosterParent;
+    private GameObject botRosterParent;
     
 
     private void Awake()
@@ -29,6 +58,10 @@ public class GameManager : MonoBehaviour
 
         //make sure UI elements which aren't needed are set to inactive
         chooseFighterUI.SetActive(false);
+        combatUI.SetActive(false);
+
+        playerRosterParent = GameObject.FindGameObjectWithTag("PlayerRoster");
+        botRosterParent = GameObject.FindGameObjectWithTag("BotRoster");
     }
 
     private void Start()
@@ -49,6 +82,16 @@ public class GameManager : MonoBehaviour
         StateMachine.SetState(new ChooseFighter(this));
     }
 
+    public void SetCombatStart()
+    {
+        StateMachine.SetState(new CombatStart(this));
+    }
+
+    public void SetCombatPriority()
+    {
+        StateMachine.SetState(new CombatPriority(this));
+    }
+
     #endregion
 
     public void UpdatePortraits()
@@ -56,10 +99,51 @@ public class GameManager : MonoBehaviour
         for(int port = 0; port < playerRoster.Count; port++)
         {
             //call the 'update portrait' func on the portrait objects, passing it the class value
+            int charClass = (int)playerRoster[port].GetCharClass();
             fighterPortraits[port].SetPortrait(playerRoster[port]);
+            fighterPortraits[port].SetFighterID(port);
         }
     }
 
+    public void ConfirmFighterSelect(FighterSelectPortrait fSelect)
+    {
+        playerCombatant = playerRoster[fSelect.GetFighterID()];
+        AssignBotFighter();
+
+        /* deprecated; objects are now spawned within the SetUpTeams state 
+        //populate the scene with sprites & stats from the player's selected fighter and AI's selected fighter
+        Instantiate(playerCombatant, playerFighterPos.position, Quaternion.identity);
+        Instantiate(botCombatant, botFighterPos.position, Quaternion.identity);
+        */
+
+        //enable and reposition the player and bot fighter objects
+        playerCombatant.transform.position = playerFighterPos.position;
+        botCombatant.transform.position = botFighterPos.position;
+
+        UpdateCombatUI();
+        SetCombatStart();        
+    }
+
+    public void AssignBotFighter()
+    {
+        if(botCombatant == null)
+        {
+            int ran = Random.Range(0, botRoster.Count);
+            //check if the randomly chosen fighter isn't dead, otherwise repeat
+            botCombatant = botRoster[ran];
+        }
+    }
+
+    public void UpdateCombatUI()
+    {
+        //update the player and bot names on the UI 
+        playerCombatantName.text = playerCombatant.GetName();
+        botCombatantName.text = botCombatant.GetName();
+
+        //update UI with stats from the selected fighters
+        playerHealthBar.fillAmount = playerCombatant.GetHPNormalized();
+        botHealthBar.fillAmount = botCombatant.GetHPNormalized();
+    }
 
     //setting up the state machine
     public abstract class GameManagerState : IState
@@ -106,12 +190,22 @@ public class GameManager : MonoBehaviour
             //Randomly select from the prefabs to populate a list of 8 slots for player's party (playerRoster)
             for(int playerSelect = 0; playerSelect < 8; playerSelect++)
             {
+
+                
                 //Debug.Log("In loop #" + playerSelect + "of selecting random characters for player");
                 //grab a random prefab
                 int randomChoice = Random.Range(0, instance.prefabCharacters.Count);
+
+                //instantiate the prefab 
+                GameObject spawnCombatant = Instantiate(instance.prefabCharacters[randomChoice].gameObject, new Vector3(2000, 2000, 0), Quaternion.identity, instance.playerRosterParent.transform);
+                Combatant tempCombatant = new Combatant();
+                spawnCombatant.TryGetComponent<Combatant>(out tempCombatant);
+                //add the prefab to the player's roster
+                instance.playerRoster.Add(tempCombatant);                
                 
-                    //add the prefab to the player's roster
-                    instance.playerRoster.Add(instance.prefabCharacters[randomChoice]);
+                instance.playerRoster[playerSelect].SetBot(false);
+                //instance.playerRoster[playerSelect].SetColourID();                
+
                 //randomly assign TYPE to each of the player's characters
                 //randomly assign ATKTYPE based on the TYPE chosen                
             }
@@ -123,8 +217,16 @@ public class GameManager : MonoBehaviour
                 //grab a random prefab
                 int botChoice = Random.Range(0, instance.prefabCharacters.Count);
 
+                GameObject spawnBot = Instantiate(instance.prefabCharacters[botChoice].gameObject, new Vector3(2100, 2100, 0), Quaternion.identity, instance.botRosterParent.transform);
+                Combatant tempBotCombatant = new Combatant();
+                spawnBot.TryGetComponent<Combatant>(out tempBotCombatant);
                 //add the prefab to the player's roster
-                instance.botRoster.Add(instance.prefabCharacters[botChoice]);
+                instance.botRoster.Add(tempBotCombatant);
+                
+                
+                instance.botRoster[botSelect].SetBot(true);
+                //instance.botRoster[botSelect].SetColourID();                
+
                 //randomly assign TYPE to each of the player's characters
                 //randomly assign ATKTYPE based on the TYPE chosen                
             }
@@ -167,14 +269,16 @@ public class GameManager : MonoBehaviour
 
         //OnUpdate:
         //update UI according to where player moves mouse/controller inputs
-        //if player uses 'select' input when a valid option is highlighted, add the relevant object to the 'selected' preview slot
-        //if that slot is already populated then remove the object currently occupying it and reactivate it in the relevant available character slot
-        //if player highlights the 'selected' character and hits 'cancel' input, remove that character and reactivate them in the available character slot
-        //if the player highlights 'confirm' and hits the 'select' input then go to the 'Combat' state
+        //(now being handled by the Unity UI system by making the icons buttons as well)
 
         //OnExit:
-        //Deactivate UI elements for character selection
-        //Deactivate prefabs visuals for the characters in Player's roster
+        public override void OnExit()
+        {
+            //Deactivate UI elements for character selection
+            //Deactivate prefabs visuals for the characters in Player's roster
+            instance.chooseFighterUI.SetActive(false);
+        }
+        
 
     }
 
@@ -186,10 +290,21 @@ public class GameManager : MonoBehaviour
 
         //OnEnter
         //activate the UI elements for combat scene
-        //populate the scene with sprites & stats from the player's selected fighter and AI's selected fighter
-        //update UI with stats from the selected fighters
-        //go to the CombatPriority state
-        
+        public override void OnEnter()
+        {
+            instance.combatUI.SetActive(true);
+
+            //go to the CombatPriority state
+            instance.SetCombatPriority();
+
+        }
+
+
+
+
+
+
+
     }
 
     public class CombatPriority : GameManagerState
