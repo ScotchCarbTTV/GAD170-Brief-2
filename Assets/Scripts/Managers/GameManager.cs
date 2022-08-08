@@ -45,6 +45,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image playerHealthBar;
     [SerializeField] private Image botHealthBar;
 
+    [Header("Combat Engine Variables")]
+    [SerializeField] private int playerPri;
+    [SerializeField] private int botPri;
+
+    [SerializeField] private Combatant alphaCombatant;
+    [SerializeField] private Combatant betaCombatant;    
+
+    [SerializeField] private TypeComparison typeComparison = new TypeComparison();
+
     public StateMachine StateMachine { get; private set; }
 
     private GameObject playerRosterParent;
@@ -90,6 +99,21 @@ public class GameManager : MonoBehaviour
     public void SetCombatPriority()
     {
         StateMachine.SetState(new CombatPriority(this));
+    }
+
+    public void SetAlphaCombat()
+    {
+        StateMachine.SetState(new CombatAlpha(this));
+    }
+
+    public void SetBetaCombat()
+    {
+        StateMachine.SetState(new CombatBeta(this));
+    }
+
+    public void SetDeclareWinner()
+    {
+        StateMachine.SetState(new DeclareWinner(this));
     }
 
     #endregion
@@ -143,6 +167,44 @@ public class GameManager : MonoBehaviour
         //update UI with stats from the selected fighters
         playerHealthBar.fillAmount = playerCombatant.GetHPNormalized();
         botHealthBar.fillAmount = botCombatant.GetHPNormalized();
+    }
+
+    public void CalculatePriority()
+    {
+        //call the 'calculate priority' on Player's fighter and store value 
+        playerPri = playerCombatant.RollPriority();
+        Debug.Log("Player Fighter PRI is " + playerPri);
+        //call the 'calculate priority' on bot's figher and store value
+        botPri = botCombatant.RollPriority();
+        Debug.Log("Bot Fighter PRI is " + botPri);
+
+
+        //compare the two values and assign whoever has the higher value as 'Alpha'
+        //if it's a true tie then just assign player's fighter as 'Alpha'
+        //assign the lower value as 'Beta'
+        if (playerPri >= botPri)
+        {
+            alphaCombatant = playerCombatant;
+            betaCombatant = botCombatant;
+        }
+        else
+        {
+            alphaCombatant = botCombatant;
+            betaCombatant = playerCombatant;
+        }
+    }
+
+    public bool CheckWinner(float defenderHP)
+    {
+        //check if the combatant's HP is lower or equal to zero 
+        if(defenderHP == 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     //setting up the state machine
@@ -296,14 +358,7 @@ public class GameManager : MonoBehaviour
 
             //go to the CombatPriority state
             instance.SetCombatPriority();
-
         }
-
-
-
-
-
-
 
     }
 
@@ -312,29 +367,66 @@ public class GameManager : MonoBehaviour
         public CombatPriority(GameManager _instance) : base(_instance) { }
 
         //OnEnter
-        //call the 'calculate priority' on Player's fighter and store value 
-        //call the 'calculate priority' on bot's figher and store value
-        //compare the two values and assign whoever has the higher value as 'Alpha' 
-            //if it's a true tie then just assign player's fighter as 'Alpha'
-            //assign the lower value as 'Beta'
+        public override void OnEnter()
+        {
+            Debug.Log("New round starting! Rolling for initiative...");
+            instance.CalculatePriority();
 
-        //go to CombatAlpha state
+            Debug.Log(instance.alphaCombatant + " won the roll!");
+
+            //go to CombatAlpha state
+            instance.SetAlphaCombat();
+        }
     }
 
     public class CombatAlpha : GameManagerState
     {
         public CombatAlpha(GameManager _instance) : base(_instance) { }
 
+        float damMulti;
+        float tempDam;
+
         //OnEnter:
-        //call the 'calculate damage' on Alpha and store as tempDam
-        //compare Alpha's ATKTYPE to Beta's TYPE
-            //adjust tempDam accordingly and assign as tempDam2
-        //reduce tempDam by Beta's DEF and assign as finalDam
+        public override void OnEnter()
+        {
+            //call the 'calculate damage' on Alpha and store as tempDam
+            tempDam = instance.alphaCombatant.RollAtk();
+            //compare Alpha's ATKTYPE to Beta's TYPE to get damMulti
+            damMulti = instance.typeComparison.GetMultiplier(instance.alphaCombatant.atkID(), instance.betaCombatant.defID());
+
+            //adjust tempDam accordingly
+            tempDam = tempDam * damMulti;
+
+            //reduce tempDam by Beta's DEF and assign as finalDam
+            tempDam -= instance.betaCombatant.GetDEFAsFloat();
+
             //clamp it to a minimum of 1
-        //subtract finalDam from Beta's HP
-        //check if Beta's HP is lower or equal to zero (have a bool method 'check4Winner' which checks the HP of Alpha & Beta and returns one or the other as 'winner' if they're at zero, otherwise returns false)
-            //if true then go to 'DeclareWinner' state
-            //otherwise go to 'CombatBeta' state
+            tempDam = Mathf.Clamp(tempDam, 1, 100);
+
+            //subtract finalDam from Beta's HP
+            instance.betaCombatant.TakeDamage(tempDam);
+
+            Debug.Log(instance.alphaCombatant + " did " + tempDam + " to " + instance.betaCombatant);
+
+            instance.UpdateCombatUI();
+
+            //check if Beta's HP is lower or equal to zero
+            if(instance.CheckWinner(instance.betaCombatant.HP) == true)
+            {
+                Debug.Log(instance.alphaCombatant + " won!");
+                //if true then go to 'DeclareWinner' state
+                
+            }
+            else
+            {
+                //otherwise go to 'CombatBeta' state
+                Debug.Log("Moving to " + instance.betaCombatant + "'s turn");
+                instance.SetBetaCombat();
+
+            }
+
+
+        }
 
     }
 
@@ -342,16 +434,48 @@ public class GameManager : MonoBehaviour
     {
         public CombatBeta(GameManager _instance) : base(_instance) { }
 
+        float tempDam;
+        float damMulti;
+
         //OnEnter:
-        //call the 'calculate damage' on Beta and store as tempDam
-        //compare Beta's ATKTYPE to Alpha's TYPE
-        //adjust tempDam accordingly and assign as tempDam2
-        //reduce tempDam by Alpha's DEF and assign as finalDam
-        //clamp it to a minimum of 1
-        //subtract finalDam from Beta's HP
-        //check if Alpha's HP is lower or equal to zero (have a bool method 'check4Winner' which checks the HP of Alpha & Beta and returns one or the other as 'winner' if they're at zero, otherwise returns false)
-        //if true then go to 'DeclareWinner' state
-        //otherwise go to 'CombatPriority' state
+        public override void OnEnter()
+        {
+            //call the 'calculate damage' on Beta and store as tempDam
+            tempDam = instance.betaCombatant.RollAtk();
+            //compare Beta's ATKTYPE to Alpha's TYPE to get damMulti
+            damMulti = instance.typeComparison.GetMultiplier(instance.betaCombatant.atkID(), instance.alphaCombatant.defID());
+
+            //adjust tempDam accordingly
+            tempDam = tempDam * damMulti;
+
+            //reduce tempDam by Alpha's DEF and assign as finalDam
+            tempDam -= instance.alphaCombatant.GetDEFAsFloat();
+
+            //clamp it to a minimum of 1
+            tempDam = Mathf.Clamp(tempDam, 1, 100);
+
+            //subtract finalDam from Beta's HP
+            instance.alphaCombatant.TakeDamage(tempDam);
+
+            Debug.Log(instance.betaCombatant + " did " + tempDam + " to " + instance.alphaCombatant);
+
+            instance.UpdateCombatUI();
+
+            //check if Beta's HP is lower or equal to zero
+            if (instance.CheckWinner(instance.alphaCombatant.HP) == true)
+            {
+                //if true then go to 'DeclareWinner' state
+                instance.SetDeclareWinner();
+            }
+            else
+            {
+                //otherwise go to 'CombatPriority' state
+                instance.SetCombatPriority();
+                
+            }
+
+        }        
+        
     }
 
     public class DeclareWinner : GameManagerState
@@ -359,12 +483,17 @@ public class GameManager : MonoBehaviour
         public DeclareWinner(GameManager _instance): base(_instance) { }
 
         //OnEnter
+        public override void OnEnter()
+        {
+            Debug.Log("Congrats you somehow got here without a crash!");
+        }
         //check if the player has any remaining combatants
-            //if not, then declare the bot as winner
-            //if true, check if the bot has any remaining combatants
-                //if not, then declare player as winner
+        //if not, then declare the bot as winner
+        //if true, check if the bot has any remaining combatants
+        //if not, then declare player as winner
         //if both have combatants left then go to the ChooseFighter state
     }
  
+
 
 }

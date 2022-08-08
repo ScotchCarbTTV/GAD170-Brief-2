@@ -16,6 +16,11 @@ public class Combatant : MonoBehaviour
 
     private float maxHP;
 
+    private int totalPri;
+    private int totalAtk;
+    private int floatDEF;
+
+
     //enum for determining the character's class
     public enum CharClass { Knight, Wizard, Ranger, Barbarian, Robot, Skeleton, Scientist, Rogue };
 
@@ -63,55 +68,94 @@ public class Combatant : MonoBehaviour
         return hpPercent;
     }
 
+    public float GetDEFAsFloat()
+    {
+        floatDEF = DEF;
+        return floatDEF;
+    }
+
+    #region Combat Methods
+    public int RollPriority()
+    {
+        totalPri = PRI + Random.Range(1, 6);
+        return totalPri;
+    }
+
+    public int RollAtk()
+    {
+        totalAtk = ATK + Random.Range(1, 12);
+        return totalAtk;
+    }
+
+    public int atkID()
+    {
+        return (int)atkColourID;
+    }
+
+    public int defID()
+    {
+        return (int)colourID;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        HP -= damage;
+        if(HP < 0)
+        {
+            HP = 0;
+        }
+    }
+    #endregion
+
     //method for setting stats based on class
     public void SetStats(CharClass _class)
     {
         switch (_class)
         {
             case CharClass.Knight:
-                HP = 10;
+                HP = 100;
                 ATK = 10;
                 DEF = 15;
                 PRI = 5;
                 break;
             case CharClass.Wizard:
-                HP = 10;
+                HP = 100;
                 ATK = 15;
                 DEF = 5;
                 PRI = 10;
                 break;
             case CharClass.Ranger:
-                HP = 5;
+                HP = 50;
                 ATK = 10;
                 DEF = 10;
                 PRI = 5;
                 break;
             case CharClass.Barbarian:
-                HP = 15;
+                HP = 150;
                 ATK = 5;
                 DEF = 10;
                 PRI = 10;
                 break;
             case CharClass.Robot:
-                HP = 5;
+                HP = 50;
                 ATK = 10;
                 DEF = 15;
                 PRI = 10;
                 break;
             case CharClass.Skeleton:
-                HP = 5;
+                HP = 50;
                 ATK = 10;
                 DEF = 10;
                 PRI = 5;
                 break;
             case CharClass.Scientist:
-                HP = 5;
+                HP = 50;
                 ATK = 10;
                 DEF = 10;
                 PRI = 5;
                 break;
             case CharClass.Rogue:
-                HP = 5;
+                HP = 50;
                 ATK = 10;
                 DEF = 10;
                 PRI = 5;
