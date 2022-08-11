@@ -1482,7 +1482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 352248988272835971}
+  m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
 --- !u!4 &1065704402
@@ -2706,6 +2706,10 @@ PrefabInstance:
       propertyPath: combatUI
       value: 
       objectReference: {fileID: 730496218}
+    - target: {fileID: 1178432654243985787, guid: bdb2ea0b4caab734a9948779463f119c, type: 3}
+      propertyPath: deadSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: aaa377af05780404d86d2760807f3c68, type: 3}
     - target: {fileID: 1178432654243985787, guid: bdb2ea0b4caab734a9948779463f119c, type: 3}
       propertyPath: botHealthBar
       value: 

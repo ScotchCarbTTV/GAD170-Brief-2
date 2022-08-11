@@ -97,6 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fb2d0a8df815f14b838df15aa55d3e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HP: 0
   charClass: 5
   colourID: 1
   atkColourID: 0
@@ -118,3 +119,4 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ccdd9aa34e8976b4da5a2a79cd7df6c3, type: 3}
   - {fileID: 21300000, guid: 4fa086d9ecfb4734e948f9abd51fbcb0, type: 3}
   - {fileID: 21300000, guid: 121d7cb6d87713d4e8627948ab515c73, type: 3}
+  deadSprite: {fileID: 21300000, guid: aaa377af05780404d86d2760807f3c68, type: 3}

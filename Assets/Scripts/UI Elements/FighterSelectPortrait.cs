@@ -33,4 +33,9 @@ public class FighterSelectPortrait : MonoBehaviour
         int portraitID = ((int)combatant.charClass);
         portrait.sprite = prefabPortraits[portraitID];
     }
+
+    public void SetPortraitDead(Sprite sprite)
+    {
+        portrait.sprite = sprite;
+    }
 }

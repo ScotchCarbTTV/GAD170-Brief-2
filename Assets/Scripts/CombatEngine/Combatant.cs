@@ -37,8 +37,9 @@ public class Combatant : MonoBehaviour
     //reference to the sprite renderer on this game object
     private SpriteRenderer spriteRenderer;
 
-    [SerializeField] private List<Sprite> playerSprites = new List<Sprite>(); 
-    [SerializeField] private List<Sprite> botSprites = new List<Sprite>();
+    [SerializeField] private List<Sprite> playerSprites;
+    [SerializeField] private List<Sprite> botSprites;
+    [SerializeField] private Sprite deadSprite;
     private void Awake()
     {
         TryGetComponent<SpriteRenderer>(out spriteRenderer);
@@ -239,12 +240,27 @@ public class Combatant : MonoBehaviour
         if (isBot == false) 
         {
             //Debug.Log("I am " + name + "and my class is " + _class);
-            spriteRenderer.sprite = playerSprites[(int)_class];
+            
+            if(HP > 0)
+            {
+                spriteRenderer.sprite = playerSprites[(int)_class];
+            }
+            else
+            {
+                spriteRenderer.sprite = deadSprite;
+            }
         }
         else
         {
             //Debug.Log("I am " + name + "and my class is " + _class);
-            spriteRenderer.sprite = botSprites[(int)_class];
+            if (HP > 0)
+            {
+                spriteRenderer.sprite = botSprites[(int)_class];
+            }
+            else
+            {
+                spriteRenderer.sprite = deadSprite;
+            }
         }
     }
 

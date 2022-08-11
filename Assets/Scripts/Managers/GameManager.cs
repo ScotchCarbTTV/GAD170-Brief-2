@@ -20,13 +20,16 @@ public class GameManager : MonoBehaviour
 
     //dunno if I'll need these???
     //list of combatants from player roster who are alive
-    //list of combatants from bot roster who are alive
+    [SerializeField] private List<Combatant> alivePlayerRoster = new List<Combatant>();
 
+    //list of combatants from bot roster who are alive
+    [SerializeField] private List<Combatant> aliveBotRoster = new List<Combatant>();
 
 
     [SerializeField] private List<FighterSelectPortrait> fighterPortraits;
+    [SerializeField] private Sprite deadSprite;
 
-    [Header ("UI Elements to Activate/Deactivate")]
+    [Header("UI Elements to Activate/Deactivate")]
     [SerializeField] private GameObject chooseFighterUI;
     [SerializeField] private GameObject combatUI;
 
@@ -50,15 +53,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int botPri;
 
     [SerializeField] private Combatant alphaCombatant;
-    [SerializeField] private Combatant betaCombatant;    
+    [SerializeField] private Combatant betaCombatant;
 
-    [SerializeField] private TypeComparison typeComparison = new TypeComparison();
+    [SerializeField] private TypeComparison typeComparison;
 
     public StateMachine StateMachine { get; private set; }
 
     private GameObject playerRosterParent;
     private GameObject botRosterParent;
-    
+
 
     private void Awake()
     {
@@ -77,6 +80,11 @@ public class GameManager : MonoBehaviour
     {
         //Debug.Log("Set the State OK");
         StateMachine.SetState(new SetUpTeams(this));
+    }
+
+    private void Update()
+    {
+        StateMachine.OnUpdate();
     }
 
     #region StateMachine setting methods
@@ -116,46 +124,92 @@ public class GameManager : MonoBehaviour
         StateMachine.SetState(new DeclareWinner(this));
     }
 
+    public void SetGameOver()
+    {
+        StateMachine.SetState(new GameOver(this));
+    }
+
     #endregion
 
     public void UpdatePortraits()
     {
-        for(int port = 0; port < playerRoster.Count; port++)
+        for (int port = 0; port < playerRoster.Count; port++)
         {
-            //call the 'update portrait' func on the portrait objects, passing it the class value
             int charClass = (int)playerRoster[port].GetCharClass();
-            fighterPortraits[port].SetPortrait(playerRoster[port]);
-            fighterPortraits[port].SetFighterID(port);
+            if (playerRoster[port].GetHPNormalized() == 0)
+            {
+                fighterPortraits[port].SetPortraitDead(deadSprite);
+                fighterPortraits[port].SetFighterID(port);
+            }
+            else
+            {
+                fighterPortraits[port].SetPortrait(playerRoster[port]);
+                fighterPortraits[port].SetFighterID(port);
+            }
+            //call the 'update portrait' func on the portrait objects, passing it the class value
+            
+            
         }
     }
 
     public void ConfirmFighterSelect(FighterSelectPortrait fSelect)
     {
-        playerCombatant = playerRoster[fSelect.GetFighterID()];
-        AssignBotFighter();
+        if (playerRoster[fSelect.GetFighterID()].GetHPNormalized() != 0)
+        {
 
-        /* deprecated; objects are now spawned within the SetUpTeams state 
-        //populate the scene with sprites & stats from the player's selected fighter and AI's selected fighter
-        Instantiate(playerCombatant, playerFighterPos.position, Quaternion.identity);
-        Instantiate(botCombatant, botFighterPos.position, Quaternion.identity);
-        */
+            playerCombatant = playerRoster[fSelect.GetFighterID()];
 
-        //enable and reposition the player and bot fighter objects
-        playerCombatant.transform.position = playerFighterPos.position;
-        botCombatant.transform.position = botFighterPos.position;
+            /* deprecated; objects are now spawned within the SetUpTeams state 
+            //populate the scene with sprites & stats from the player's selected fighter and AI's selected fighter
+            Instantiate(playerCombatant, playerFighterPos.position, Quaternion.identity);
+            Instantiate(botCombatant, botFighterPos.position, Quaternion.identity);
+            */
 
-        UpdateCombatUI();
-        SetCombatStart();        
+            //enable and reposition the player and bot fighter objects
+            playerCombatant.transform.position = playerFighterPos.position;
+            botCombatant.transform.position = botFighterPos.position;
+
+            UpdateCombatUI();
+            SetCombatStart();
+        }
+        else
+        {
+            //Debug.Log("That combatant is dead! Choose another!");
+        }
+
     }
 
     public void AssignBotFighter()
     {
-        if(botCombatant == null)
+        //Debug.Log("Assigning Bot Fighter");
+        
+                //check if the randomly chosen fighter isn't dead, otherwise repeat
+                bool findingBot = false;
+        if (aliveBotRoster.Count != 0)
         {
-            int ran = Random.Range(0, botRoster.Count);
-            //check if the randomly chosen fighter isn't dead, otherwise repeat
-            botCombatant = botRoster[ran];
+            while (findingBot == false)
+            {
+                //Debug.Log("Finding Bot Fighter...");
+                int ran = Random.Range(0, botRoster.Count);
+                if (botRoster[ran].GetHPNormalized() != 0)
+                {
+                    botCombatant = botRoster[ran];
+                    findingBot = true;
+                }
+                else
+                {
+                    //Debug.Log("Chose a dead fighter, trying again...");
+                }
+
+
+            }
         }
+        else
+        {
+            //Debug.Log("All the bots are dead and you aren't supposed to be here.");
+        }
+            
+        
     }
 
     public void UpdateCombatUI()
@@ -171,12 +225,15 @@ public class GameManager : MonoBehaviour
 
     public void CalculatePriority()
     {
+
         //call the 'calculate priority' on Player's fighter and store value 
         playerPri = playerCombatant.RollPriority();
-        Debug.Log("Player Fighter PRI is " + playerPri);
+        //Debug.Log("Player Fighter PRI is " + playerPri);
         //call the 'calculate priority' on bot's figher and store value
+
         botPri = botCombatant.RollPriority();
-        Debug.Log("Bot Fighter PRI is " + botPri);
+        //Debug.Log("Bot Fighter PRI is " + botPri);
+
 
 
         //compare the two values and assign whoever has the higher value as 'Alpha'
@@ -197,7 +254,7 @@ public class GameManager : MonoBehaviour
     public bool CheckWinner(float defenderHP)
     {
         //check if the combatant's HP is lower or equal to zero 
-        if(defenderHP == 0)
+        if (defenderHP == 0)
         {
             return true;
         }
@@ -206,6 +263,7 @@ public class GameManager : MonoBehaviour
             return false;
         }
     }
+
 
     //setting up the state machine
     public abstract class GameManagerState : IState
@@ -250,21 +308,21 @@ public class GameManager : MonoBehaviour
         {
             //Debug.Log("entered SetUpTeams OK");
             //Randomly select from the prefabs to populate a list of 8 slots for player's party (playerRoster)
-            for(int playerSelect = 0; playerSelect < 8; playerSelect++)
+            for (int playerSelect = 0; playerSelect < 8; playerSelect++)
             {
 
-                
+
                 //Debug.Log("In loop #" + playerSelect + "of selecting random characters for player");
                 //grab a random prefab
                 int randomChoice = Random.Range(0, instance.prefabCharacters.Count);
 
                 //instantiate the prefab 
                 GameObject spawnCombatant = Instantiate(instance.prefabCharacters[randomChoice].gameObject, new Vector3(2000, 2000, 0), Quaternion.identity, instance.playerRosterParent.transform);
-                Combatant tempCombatant = new Combatant();
+                Combatant tempCombatant;
                 spawnCombatant.TryGetComponent<Combatant>(out tempCombatant);
                 //add the prefab to the player's roster
-                instance.playerRoster.Add(tempCombatant);                
-                
+                instance.playerRoster.Add(tempCombatant);
+
                 instance.playerRoster[playerSelect].SetBot(false);
                 //instance.playerRoster[playerSelect].SetColourID();                
 
@@ -280,17 +338,14 @@ public class GameManager : MonoBehaviour
                 int botChoice = Random.Range(0, instance.prefabCharacters.Count);
 
                 GameObject spawnBot = Instantiate(instance.prefabCharacters[botChoice].gameObject, new Vector3(2100, 2100, 0), Quaternion.identity, instance.botRosterParent.transform);
-                Combatant tempBotCombatant = new Combatant();
+                Combatant tempBotCombatant;
                 spawnBot.TryGetComponent<Combatant>(out tempBotCombatant);
                 //add the prefab to the player's roster
                 instance.botRoster.Add(tempBotCombatant);
-                
-                
-                instance.botRoster[botSelect].SetBot(true);
-                //instance.botRoster[botSelect].SetColourID();                
 
-                //randomly assign TYPE to each of the player's characters
-                //randomly assign ATKTYPE based on the TYPE chosen                
+
+                instance.botRoster[botSelect].SetBot(true);
+                //instance.botRoster[botSelect].SetColourID();                               
             }
             //go to the 'PlayerChooseFighter' state
             instance.SetChooseFighter();
@@ -298,8 +353,16 @@ public class GameManager : MonoBehaviour
 
         public override void OnExit()
         {
-            
-                      
+            //take all the combatants from the player roster and bot roster and add them to the alive roster
+            foreach (Combatant cbt in instance.playerRoster)
+            {
+                instance.alivePlayerRoster.Add(cbt);
+            }
+            foreach (Combatant bot in instance.botRoster)
+            {
+                instance.aliveBotRoster.Add(bot);
+            }
+
         }
     }
 
@@ -310,17 +373,13 @@ public class GameManager : MonoBehaviour
         //OnEnter:
         public override void OnEnter()
         {
+            instance.AssignBotFighter();
             //switch on UI elements for character selection
             instance.chooseFighterUI.SetActive(true);
+            instance.combatUI.SetActive(false);
 
             //Populate scene with prefab visual representations of the characters in the Player's roster
             instance.UpdatePortraits();
-
-            //iterate through each character and check if their HP is currently greater than zero
-            //if its 0 or less then switch over to a 'dead' version of that character portrait & set the prefab character select UI object to its 'dead' state
-
-            //Call the 'botChooseFighter' method
-            //Randomly select from the AI's roster the opponent they will be using
         }
 
 
@@ -336,11 +395,15 @@ public class GameManager : MonoBehaviour
         //OnExit:
         public override void OnExit()
         {
+            //Call the 'botChooseFighter' method
+            //Randomly select from the AI's roster the opponent they will be using
+
+
             //Deactivate UI elements for character selection
             //Deactivate prefabs visuals for the characters in Player's roster
             instance.chooseFighterUI.SetActive(false);
         }
-        
+
 
     }
 
@@ -369,13 +432,19 @@ public class GameManager : MonoBehaviour
         //OnEnter
         public override void OnEnter()
         {
-            Debug.Log("New round starting! Rolling for initiative...");
+            //Debug.Log("New round starting! Rolling for initiative...");
             instance.CalculatePriority();
 
-            Debug.Log(instance.alphaCombatant + " won the roll!");
+            //Debug.Log(instance.alphaCombatant + " won the roll!");
+        }
 
-            //go to CombatAlpha state
-            instance.SetAlphaCombat();
+        public override void OnUpdate()
+        {
+            if (Input.GetButtonDown("Submit"))
+            {
+                //go to CombatAlpha state
+                instance.SetAlphaCombat();
+            }
         }
     }
 
@@ -406,26 +475,25 @@ public class GameManager : MonoBehaviour
             //subtract finalDam from Beta's HP
             instance.betaCombatant.TakeDamage(tempDam);
 
-            Debug.Log(instance.alphaCombatant + " did " + tempDam + " to " + instance.betaCombatant);
+            //Debug.Log(instance.alphaCombatant + " did " + tempDam + " to " + instance.betaCombatant);
 
             instance.UpdateCombatUI();
 
             //check if Beta's HP is lower or equal to zero
-            if(instance.CheckWinner(instance.betaCombatant.HP) == true)
+            if (instance.CheckWinner(instance.betaCombatant.HP) == true)
             {
-                Debug.Log(instance.alphaCombatant + " won!");
+                //Debug.Log(instance.alphaCombatant + " won!");
                 //if true then go to 'DeclareWinner' state
-                
+                instance.SetDeclareWinner();
+
             }
             else
             {
                 //otherwise go to 'CombatBeta' state
-                Debug.Log("Moving to " + instance.betaCombatant + "'s turn");
+                //Debug.Log("Moving to " + instance.betaCombatant + "'s turn");
                 instance.SetBetaCombat();
 
             }
-
-
         }
 
     }
@@ -457,7 +525,7 @@ public class GameManager : MonoBehaviour
             //subtract finalDam from Beta's HP
             instance.alphaCombatant.TakeDamage(tempDam);
 
-            Debug.Log(instance.betaCombatant + " did " + tempDam + " to " + instance.alphaCombatant);
+            //Debug.Log(instance.betaCombatant + " did " + tempDam + " to " + instance.alphaCombatant);
 
             instance.UpdateCombatUI();
 
@@ -471,29 +539,108 @@ public class GameManager : MonoBehaviour
             {
                 //otherwise go to 'CombatPriority' state
                 instance.SetCombatPriority();
-                
+
             }
 
-        }        
-        
+        }
+
     }
 
     public class DeclareWinner : GameManagerState
     {
-        public DeclareWinner(GameManager _instance): base(_instance) { }
+        public DeclareWinner(GameManager _instance) : base(_instance) { }
+
+        private bool gameOver;
 
         //OnEnter
         public override void OnEnter()
         {
-            Debug.Log("Congrats you somehow got here without a crash!");
+            gameOver = false;
+            //Debug.Log("Congrats you somehow got here without a crash!");
+            //iterate through each character and check if their HP is currently greater than zero
+            //if its 0 or less then switch over to a 'dead' version of that character portrait & set the prefab character select UI object to its 'dead' state
+            for (int alive = 0; alive < instance.playerRoster.Count; alive++)
+            {
+                if (instance.playerRoster[alive].GetHPNormalized() == 0)
+                {
+                    if (instance.alivePlayerRoster.Contains(instance.playerRoster[alive]))
+                    {
+                        instance.alivePlayerRoster.Remove(instance.playerRoster[alive]);
+                    }
+                }
+            }
+            for (int botlive = 0; botlive < instance.botRoster.Count; botlive++)
+            {
+                if (instance.botRoster[botlive].GetHPNormalized() == 0)
+                {
+                    if (instance.aliveBotRoster.Contains(instance.botRoster[botlive]))
+                    {
+                        instance.aliveBotRoster.Remove(instance.botRoster[botlive]);
+                    }
+                }
+            }
+            //Debug.Log("Bot has " + instance.aliveBotRoster.Count + " fighters left!");
+
+
+            
+
+            if (instance.aliveBotRoster.Count == 0)
+            {
+                //if true, check if the bot has any remaining combatants
+                //if not, then declare player as winner
+                //Debug.Log("The Player Wins!");
+                gameOver = true;
+            }
+            else if (instance.alivePlayerRoster.Count == 0)
+            {
+                //check if the player has any remaining combatants
+                //if not, then declare the bot as winner
+               // Debug.Log("The Bot Wins!");
+                Time.timeScale = 0;
+                gameOver = true;
+            }
+            else
+            {
+
+                if (instance.playerCombatant.GetHPNormalized() == 0)
+                {
+                   // Debug.Log(instance.botCombatant.GetName() + " wins the round!");
+                }
+                else
+                {
+                   // Debug.Log(instance.playerCombatant.GetName() + " wins the round!");
+                }
+            }
         }
-        //check if the player has any remaining combatants
-        //if not, then declare the bot as winner
-        //if true, check if the bot has any remaining combatants
-        //if not, then declare player as winner
-        //if both have combatants left then go to the ChooseFighter state
+
+        public override void OnUpdate()
+        {
+            //if both have combatants left then go to the ChooseFighter state
+            if (Input.GetButtonDown("Submit"))
+            {
+                if (gameOver == false)
+                {
+                    instance.playerCombatant.transform.position = new Vector3(2100, 2100, 0);
+                    instance.botCombatant.transform.position = new Vector3(2100, 2100, 0);
+                    instance.SetChooseFighter();
+                }
+                else
+                {
+                    instance.SetGameOver();
+                }
+            }
+        }
     }
- 
 
+    public class GameOver : GameManagerState
+    {
+        public GameOver(GameManager _instance) : base(_instance) { }
 
-}
+        public override void OnEnter()
+        {
+            instance.combatUI.SetActive(false);
+           // Debug.Log("The game has finished.");
+        }
+    }
+
+    }
