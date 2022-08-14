@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform botFighterPos;
 
     [Header("Combat UI elements")]
+    [SerializeField] CombatLog combatLog;
+
     [SerializeField] private Text playerCombatantName;
     [SerializeField] private Text botCombatantName;
 
@@ -175,6 +177,7 @@ public class GameManager : MonoBehaviour
         else
         {
             //Debug.Log("That combatant is dead! Choose another!");
+            combatLog.UpdateCombatLog("That combatant is dead! Choose another!");
         }
 
     }
@@ -221,6 +224,8 @@ public class GameManager : MonoBehaviour
         //update UI with stats from the selected fighters
         playerHealthBar.fillAmount = playerCombatant.GetHPNormalized();
         botHealthBar.fillAmount = botCombatant.GetHPNormalized();
+
+        combatLog.UpdateCombatLog(playerCombatantName.text + " vs " + botCombatantName.text + "!");
     }
 
     public void CalculatePriority()
@@ -234,7 +239,7 @@ public class GameManager : MonoBehaviour
         botPri = botCombatant.RollPriority();
         //Debug.Log("Bot Fighter PRI is " + botPri);
 
-
+        
 
         //compare the two values and assign whoever has the higher value as 'Alpha'
         //if it's a true tie then just assign player's fighter as 'Alpha'
@@ -243,11 +248,13 @@ public class GameManager : MonoBehaviour
         {
             alphaCombatant = playerCombatant;
             betaCombatant = botCombatant;
+            combatLog.UpdateCombatLog("Rolling for priority! " + playerCombatantName.text + " got " + playerPri + "! " + botCombatantName.text + " got " + botPri + "!");
         }
         else
         {
             alphaCombatant = botCombatant;
             betaCombatant = playerCombatant;
+            combatLog.UpdateCombatLog("Rolling for priority! " + playerCombatantName.text + " got " + playerPri + "! " + botCombatantName.text + " got " + botPri + "!");
         }
     }
 

@@ -22,7 +22,7 @@ public class Combatant : MonoBehaviour
 
 
     //enum for determining the character's class
-    public enum CharClass { Knight, Wizard, Ranger, Barbarian, Robot, Skeleton, Scientist, Rogue };
+    public enum CharClass { Knight, Wizard, Ranger, Barbarian, Rogue };
 
     public CharClass charClass;
 
@@ -136,25 +136,7 @@ public class Combatant : MonoBehaviour
                 ATK = 5;
                 DEF = 10;
                 PRI = 10;
-                break;
-            case CharClass.Robot:
-                HP = 50;
-                ATK = 10;
-                DEF = 15;
-                PRI = 10;
-                break;
-            case CharClass.Skeleton:
-                HP = 50;
-                ATK = 10;
-                DEF = 10;
-                PRI = 5;
-                break;
-            case CharClass.Scientist:
-                HP = 50;
-                ATK = 10;
-                DEF = 10;
-                PRI = 5;
-                break;
+                break;            
             case CharClass.Rogue:
                 HP = 50;
                 ATK = 10;

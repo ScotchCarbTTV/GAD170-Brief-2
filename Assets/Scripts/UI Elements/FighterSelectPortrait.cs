@@ -31,6 +31,7 @@ public class FighterSelectPortrait : MonoBehaviour
     public void SetPortrait(Combatant combatant)
     {
         int portraitID = ((int)combatant.charClass);
+        Debug.Log(portraitID);
         portrait.sprite = prefabPortraits[portraitID];
     }
 

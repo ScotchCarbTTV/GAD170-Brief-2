@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5431499060039717897
+--- !u!1 &3850442256732001637
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,38 +8,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6588287222768316688}
-  - component: {fileID: 7533051141832883806}
-  - component: {fileID: 2354790982957773256}
+  - component: {fileID: 865877878955012551}
+  - component: {fileID: 2952954015103985999}
+  - component: {fileID: -3438821842553742911}
   m_Layer: 0
-  m_Name: Scientist
+  m_Name: Rogue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6588287222768316688
+--- !u!4 &865877878955012551
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5431499060039717897}
+  m_GameObject: {fileID: 3850442256732001637}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &7533051141832883806
+--- !u!212 &2952954015103985999
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5431499060039717897}
+  m_GameObject: {fileID: 3850442256732001637}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -85,38 +85,32 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2354790982957773256
+--- !u!114 &-3438821842553742911
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5431499060039717897}
+  m_GameObject: {fileID: 3850442256732001637}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6fb2d0a8df815f14b838df15aa55d3e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   HP: 0
-  charClass: 6
+  charClass: 4
   colourID: 0
   atkColourID: 0
   playerSprites:
-  - {fileID: 21300000, guid: b5e7cf23318de1c4c8a28245ffb4d4b6, type: 3}
-  - {fileID: 21300000, guid: bf1ed7f55920c0b498eaceff5a28c9c2, type: 3}
-  - {fileID: 21300000, guid: 09b35b3fd3a529940be5b72a833499df, type: 3}
-  - {fileID: 21300000, guid: f718d7c31a503f64898f2177f836405f, type: 3}
-  - {fileID: 21300000, guid: 5c4afdd3feccabe4eac37b065dadd19a, type: 3}
-  - {fileID: 21300000, guid: ccdd9aa34e8976b4da5a2a79cd7df6c3, type: 3}
-  - {fileID: 21300000, guid: 4fa086d9ecfb4734e948f9abd51fbcb0, type: 3}
-  - {fileID: 21300000, guid: 121d7cb6d87713d4e8627948ab515c73, type: 3}
+  - {fileID: 21300000, guid: 990138f654fa749458dc340078033ca0, type: 3}
+  - {fileID: 21300000, guid: 8e870adb00835ac47b377eda905fbac1, type: 3}
+  - {fileID: 21300000, guid: 4236b5f5c42f47d44bc4425f3dd668c1, type: 3}
+  - {fileID: 21300000, guid: 29155ad4a9a9ff843be1213badf96321, type: 3}
+  - {fileID: 21300000, guid: b8d79959d08157c4db7304d473e16505, type: 3}
   botSprites:
-  - {fileID: 21300000, guid: b5e7cf23318de1c4c8a28245ffb4d4b6, type: 3}
-  - {fileID: 21300000, guid: bf1ed7f55920c0b498eaceff5a28c9c2, type: 3}
-  - {fileID: 21300000, guid: 09b35b3fd3a529940be5b72a833499df, type: 3}
-  - {fileID: 21300000, guid: f718d7c31a503f64898f2177f836405f, type: 3}
-  - {fileID: 21300000, guid: 5c4afdd3feccabe4eac37b065dadd19a, type: 3}
-  - {fileID: 21300000, guid: ccdd9aa34e8976b4da5a2a79cd7df6c3, type: 3}
-  - {fileID: 21300000, guid: 4fa086d9ecfb4734e948f9abd51fbcb0, type: 3}
-  - {fileID: 21300000, guid: 121d7cb6d87713d4e8627948ab515c73, type: 3}
+  - {fileID: 21300000, guid: 990138f654fa749458dc340078033ca0, type: 3}
+  - {fileID: 21300000, guid: 8e870adb00835ac47b377eda905fbac1, type: 3}
+  - {fileID: 21300000, guid: 4236b5f5c42f47d44bc4425f3dd668c1, type: 3}
+  - {fileID: 21300000, guid: 29155ad4a9a9ff843be1213badf96321, type: 3}
+  - {fileID: 21300000, guid: b8d79959d08157c4db7304d473e16505, type: 3}
   deadSprite: {fileID: 21300000, guid: aaa377af05780404d86d2760807f3c68, type: 3}
