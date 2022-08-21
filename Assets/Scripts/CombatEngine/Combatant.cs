@@ -20,6 +20,7 @@ public class Combatant : MonoBehaviour
     private int totalAtk;
     private int floatDEF;
 
+    private int fighterID;
 
     //enum for determining the character's class
     public enum CharClass { Knight, Wizard, Ranger, Barbarian, Rogue };
@@ -40,6 +41,8 @@ public class Combatant : MonoBehaviour
     [SerializeField] private List<Sprite> playerSprites;
     [SerializeField] private List<Sprite> botSprites;
     [SerializeField] private Sprite deadSprite;
+
+
     private void Awake()
     {
         TryGetComponent<SpriteRenderer>(out spriteRenderer);
@@ -73,6 +76,11 @@ public class Combatant : MonoBehaviour
     {
         floatDEF = DEF;
         return floatDEF;
+    }
+
+    public void SetCharacterID(int fID)
+    {
+        fighterID = fID;
     }
 
     #region Combat Methods

@@ -14,9 +14,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<Combatant> prefabCharacters = new List<Combatant>();
 
     //list of character class 'playerRoster'
-    [SerializeField] private List<Combatant> playerRoster = new List<Combatant>();
+     public List<Combatant> playerRoster = new List<Combatant>();
     //list of character class 'botRoster'
-    [SerializeField] private List<Combatant> botRoster = new List<Combatant>();
+    public  List<Combatant> botRoster = new List<Combatant>();
 
     //dunno if I'll need these???
     //list of combatants from player roster who are alive
@@ -196,7 +196,7 @@ public class GameManager : MonoBehaviour
                 int ran = Random.Range(0, botRoster.Count);
                 if (botRoster[ran].GetHPNormalized() != 0)
                 {
-                    botCombatant = botRoster[ran];
+                    botCombatant = botRoster[ran];                    
                     findingBot = true;
                 }
                 else
@@ -211,21 +211,24 @@ public class GameManager : MonoBehaviour
         {
             //Debug.Log("All the bots are dead and you aren't supposed to be here.");
         }
-            
-        
+        Invoke("ShowNextBot", 1f);
+
+    }
+
+    public void ShowNextBot()
+    {
+        FighterStatsPanel.ShowNextBotEvent(botCombatant);
     }
 
     public void UpdateCombatUI()
     {
         //update the player and bot names on the UI 
         playerCombatantName.text = playerCombatant.GetName();
-        botCombatantName.text = botCombatant.GetName();
+        botCombatantName.text = botCombatant.GetName();        
 
         //update UI with stats from the selected fighters
         playerHealthBar.fillAmount = playerCombatant.GetHPNormalized();
-        botHealthBar.fillAmount = botCombatant.GetHPNormalized();
-
-        combatLog.UpdateCombatLog(playerCombatantName.text + " vs " + botCombatantName.text + "!");
+        botHealthBar.fillAmount = botCombatant.GetHPNormalized();        
     }
 
     public void CalculatePriority()
@@ -317,8 +320,6 @@ public class GameManager : MonoBehaviour
             //Randomly select from the prefabs to populate a list of 8 slots for player's party (playerRoster)
             for (int playerSelect = 0; playerSelect < 8; playerSelect++)
             {
-
-
                 //Debug.Log("In loop #" + playerSelect + "of selecting random characters for player");
                 //grab a random prefab
                 int randomChoice = Random.Range(0, instance.prefabCharacters.Count);
@@ -327,6 +328,7 @@ public class GameManager : MonoBehaviour
                 GameObject spawnCombatant = Instantiate(instance.prefabCharacters[randomChoice].gameObject, new Vector3(2000, 2000, 0), Quaternion.identity, instance.playerRosterParent.transform);
                 Combatant tempCombatant;
                 spawnCombatant.TryGetComponent<Combatant>(out tempCombatant);
+                tempCombatant.SetCharacterID(playerSelect);
                 //add the prefab to the player's roster
                 instance.playerRoster.Add(tempCombatant);
 
@@ -383,8 +385,7 @@ public class GameManager : MonoBehaviour
             instance.AssignBotFighter();
             //switch on UI elements for character selection
             instance.chooseFighterUI.SetActive(true);
-            instance.combatUI.SetActive(false);
-
+            instance.combatUI.SetActive(false);           
             //Populate scene with prefab visual representations of the characters in the Player's roster
             instance.UpdatePortraits();
         }
@@ -424,8 +425,9 @@ public class GameManager : MonoBehaviour
         //activate the UI elements for combat scene
         public override void OnEnter()
         {
+            instance.combatLog.WipeLog();
             instance.combatUI.SetActive(true);
-
+            instance.combatLog.UpdateCombatLog(instance.playerCombatantName.text + " vs " + instance.botCombatantName.text + "!");
             //go to the CombatPriority state
             instance.SetCombatPriority();
         }
@@ -483,6 +485,7 @@ public class GameManager : MonoBehaviour
             instance.betaCombatant.TakeDamage(tempDam);
 
             //Debug.Log(instance.alphaCombatant + " did " + tempDam + " to " + instance.betaCombatant);
+            instance.combatLog.UpdateCombatLog(instance.alphaCombatant + " did " + tempDam + " to " + instance.betaCombatant);
 
             instance.UpdateCombatUI();
 
@@ -533,6 +536,7 @@ public class GameManager : MonoBehaviour
             instance.alphaCombatant.TakeDamage(tempDam);
 
             //Debug.Log(instance.betaCombatant + " did " + tempDam + " to " + instance.alphaCombatant);
+            instance.combatLog.UpdateCombatLog(instance.betaCombatant + " did " + tempDam + " to " + instance.alphaCombatant);
 
             instance.UpdateCombatUI();
 
@@ -611,11 +615,13 @@ public class GameManager : MonoBehaviour
 
                 if (instance.playerCombatant.GetHPNormalized() == 0)
                 {
-                   // Debug.Log(instance.botCombatant.GetName() + " wins the round!");
+                    // Debug.Log(instance.botCombatant.GetName() + " wins the round!");
+                    instance.combatLog.UpdateCombatLog(instance.botCombatant.GetName() + " wins the round!");
                 }
                 else
                 {
-                   // Debug.Log(instance.playerCombatant.GetName() + " wins the round!");
+                    // Debug.Log(instance.playerCombatant.GetName() + " wins the round!");
+                    instance.combatLog.UpdateCombatLog(instance.playerCombatant.GetName() + " wins the round!");
                 }
             }
         }

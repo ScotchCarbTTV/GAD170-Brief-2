@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FighterSelectPortrait : MonoBehaviour
+public class FighterSelectPortrait : MonoBehaviour, IPointerEnterHandler
 {
     //list of the prefab sprites
     [SerializeField] List<Sprite> prefabPortraits = new List<Sprite>();
@@ -31,12 +32,22 @@ public class FighterSelectPortrait : MonoBehaviour
     public void SetPortrait(Combatant combatant)
     {
         int portraitID = ((int)combatant.charClass);
-        Debug.Log(portraitID);
+        //Debug.Log(portraitID);
         portrait.sprite = prefabPortraits[portraitID];
     }
 
     public void SetPortraitDead(Sprite sprite)
     {
         portrait.sprite = sprite;
+    }     
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        FighterStatsPanel.ShowFighterNameEvent(fighterID);
+        FighterStatsPanel.ShowCurrentHPEvent(fighterID);
+        FighterStatsPanel.ShowAtkPowerEvent(fighterID);
+        FighterStatsPanel.ShowDefValueEvent(fighterID);
+        FighterStatsPanel.ShowPriValueEvent(fighterID);
+        FighterStatsPanel.ShowAtkTypeEvent(fighterID);
     }
 }
